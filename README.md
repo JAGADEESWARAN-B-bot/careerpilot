@@ -4,6 +4,39 @@ An AI-powered, full-stack career acceleration platform engineered for Computer S
 
 ---
 
+## 🛠️ Vercel 404 NOT_FOUND Resolution
+
+### The Root Cause
+When accessing the deployed site on Vercel, the edge router returned:
+```
+This page doesn’t exist. It may have been moved, removed, or never existed. 404 NOT_FOUND
+Error reference: bom1::b6sxp-1791969899727-f6c8f654597d
+```
+
+**Why this happened**:
+1. **Missing Web Application Manifest & Entry Point**: The project root lacked `package.json`, `index.html`, and `vite.config.ts`.
+2. **Missing Build Artifacts & Output Directory**: Vercel expects a static bundle in `dist/` (for Vite), but no build output directory existed.
+3. **Missing SPA Rewrites in `vercel.json`**: Client-side single page applications (SPAs) require an edge rewrite rule (`/(.*) -> /index.html`) so that deep URLs and page refreshes do not trigger edge network 404s.
+
+### How It Was Fixed:
+1. **Created complete React 18 + TypeScript + Vite + Tailwind CSS frontend** in `src/` matching all CareerPilot features.
+2. **Created `vercel.json`** specifying the Vite framework preset, `dist` output directory, and SPA rewrite:
+   ```json
+   {
+     "framework": "vite",
+     "buildCommand": "npm run build",
+     "outputDirectory": "dist",
+     "cleanUrls": true,
+     "rewrites": [
+       { "source": "/(.*)", "destination": "/index.html" }
+     ]
+   }
+   ```
+3. **Created `api/gemini.ts`** for serverless server-side AI execution.
+4. **Compiled and Verified**: Executed `npm run build` (`tsc && vite build`) generating the production bundle in `dist/` with zero errors.
+
+---
+
 ## 🌟 Main Features
 
 1. **Smart Job & Skill Matching**
@@ -25,7 +58,7 @@ An AI-powered, full-stack career acceleration platform engineered for Computer S
 
 4. **Personalized Learning Roadmaps**
    - Milestone-driven curricula: Stage 1 (Foundations), Stage 2 (Core ML/DL Engineering), and Stage 3 (Generative AI, LLMs & Production MLOps).
-   - Interactive module checkboxes with persistent Room database tracking.
+   - Interactive module checkboxes with persistent state tracking.
    - Practical hands-on lab exercises and direct links to official documentation.
 
 5. **AI Mock Interview Terminal**
@@ -39,16 +72,7 @@ An AI-powered, full-stack career acceleration platform engineered for Computer S
 
 7. **Supabase & Vercel Production Readiness**
    - Complete 9-table PostgreSQL schema (`/supabase/schema.sql`) with Row Level Security (RLS) policies.
-   - Ready for web deployment or export to GitHub and Vercel.
-
----
-
-## 🛠️ Technology Stack
-
-- **Android App**: Kotlin, Jetpack Compose, Material Design 3, Room Database, Coroutines & Flow, Retrofit / OkHttp
-- **AI Engine**: Google Gemini 3.5 Flash (`v1beta/models/gemini-3.5-flash:generateContent`)
-- **Cloud Database (Ready)**: Supabase PostgreSQL with Row Level Security (RLS)
-- **Deployment Targets**: Android APK / Streaming Emulator, Vercel Serverless (Web export)
+   - Serverless API handler in `/api/gemini.ts`.
 
 ---
 
@@ -56,127 +80,74 @@ An AI-powered, full-stack career acceleration platform engineered for Computer S
 
 ```
 .
+├── index.html                       # HTML application entry point
+├── package.json                     # NPM dependencies & build scripts
+├── vite.config.ts                   # Vite build configuration (outDir: dist)
+├── tsconfig.json                    # TypeScript compiler configuration
+├── tailwind.config.js               # Tailwind design system tokens
+├── vercel.json                      # Vercel deployment framework & rewrite rules
 ├── .env.example                     # Environment variable placeholders
-├── metadata.json                    # AI Studio platform identification
-├── app/
-│   ├── build.gradle.kts             # Gradle build configuration & dependencies
-│   └── src/main/
-│       ├── AndroidManifest.xml      # Permissions and launcher activity
-│       ├── java/com/example/
-│       │   ├── MainActivity.kt      # Main host activity, Scaffold, and router
-│       │   ├── ai/
-│       │   │   └── GeminiCareerService.kt   # Gemini REST API & fallback logic
-│       │   ├── data/
-│       │   │   ├── SampleData.kt            # Curated jobs, benchmarks, roadmaps
-│       │   │   ├── CareerPilotRepository.kt # Repository bridging Room & AI
-│       │   │   └── local/
-│       │   │       └── CareerPilotDatabase.kt # Room database, DAOs & entities
-│       │   ├── model/
-│       │   │   └── Models.kt                # Domain data models
-│       │   └── ui/
-│       │       ├── CareerPilotViewModel.kt  # MVI / MVVM StateFlow manager
-│       │       ├── components/
-│       │       │   └── CommonComponents.kt   # Top bar, nav, score badges, chips
-│       │       ├── screens/
-│       │       │   ├── LandingScreen.kt
-│       │       │   ├── DashboardScreen.kt
-│       │       │   ├── ProfileScreen.kt
-│       │       │   ├── ResumeAnalyzerScreen.kt
-│       │       │   ├── JobMatchingScreen.kt
-│       │       │   ├── SkillGapScreen.kt
-│       │       │   ├── RoadmapScreen.kt
-│       │       │   ├── MockInterviewScreen.kt
-│       │       │   ├── CareerExplorerScreen.kt
-│       │       │   └── SettingsScreen.kt
-│       │       └── theme/
-│       │           ├── Color.kt             # Deep Blue, Cyan, Violet palette
-│       │           └── Theme.kt             # Material 3 typography & styling
+├── dist/                            # Production build output
+├── api/
+│   └── gemini.ts                    # Vercel serverless function for AI
+├── src/
+│   ├── main.tsx                     # React DOM root render
+│   ├── App.tsx                      # Root component, router & state manager
+│   ├── index.css                    # Tailwind CSS directives
+│   ├── types/
+│   │   └── index.ts                 # Domain TypeScript interfaces
+│   ├── lib/
+│   │   ├── gemini.ts                # Gemini API client & local fallback
+│   │   └── supabase.ts              # Supabase client with safe initialization
+│   ├── data/
+│   │   └── mockData.ts              # Curated datasets, jobs, roadmaps, benchmarks
+│   ├── components/
+│   │   ├── Navbar.tsx               # Header navigation & AI status indicator
+│   │   ├── Footer.tsx               # Platform footer & tech stack
+│   │   └── StatusNotice.tsx         # Reusable badges, notices & tags
+│   └── pages/
+│       ├── LandingPage.tsx          # Hero, how it works, FAQs
+│       ├── DashboardPage.tsx        # Overview, metrics & quick accelerators
+│       ├── ProfilePage.tsx          # Technical skills & education editor
+│       ├── ResumeAnalyzerPage.tsx   # ATS & Gemini resume scanner
+│       ├── JobMatchingPage.tsx      # Job search, match score & apply
+│       ├── SkillGapPage.tsx         # Competency benchmark & action plan
+│       ├── RoadmapPage.tsx          # 3-stage milestone curriculum
+│       ├── InterviewPage.tsx        # Q&A interview coach with rubric
+│       ├── CareerExplorerPage.tsx   # 9 technical career deep dives
+│       ├── SettingsPage.tsx         # Supabase & Vercel deployment docs
+│       ├── AuthModal.tsx            # Sign in / Sign up dialog
+│       └── NotFoundPage.tsx         # 404 fallback page
 ├── supabase/
-│   └── schema.sql                   # 9-table SQL schema with RLS policies
-└── README.md
+│   └── schema.sql                   # 9-table PostgreSQL schema with RLS
+└── app/                             # Android Jetpack Compose codebase
 ```
 
 ---
 
-## 🔐 Environment Variables & Secrets
+## 🚀 Building & Deploying
 
-In `.env.example`:
-```env
-# Google Gemini AI API key for resume analysis, skill gap, and mock interview
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
-
-# For Supabase Web / Cloud deployment
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
-```
-
-### Configuring in Google AI Studio
-1. Open the **Secrets** panel in Google AI Studio.
-2. Add a new secret named `GEMINI_API_KEY` and paste your Gemini API key.
-3. The app automatically injects this via `BuildConfig.GEMINI_API_KEY` at build time.
-4. If no key is set, the application operates gracefully with intelligent local rule-based evaluations.
-
----
-
-## 🗄️ Supabase Database Setup
-
-1. Log into your [Supabase Console](https://supabase.com).
-2. Create a new project.
-3. Navigate to the **SQL Editor** in the left sidebar.
-4. Copy the entire contents of `supabase/schema.sql` and run the script.
-5. The 9 tables will be provisioned with proper UUIDs, constraints, and Row Level Security:
-   - `profiles`
-   - `user_skills`
-   - `resumes`
-   - `resume_analyses`
-   - `jobs`
-   - `saved_jobs`
-   - `learning_roadmaps`
-   - `roadmap_progress`
-   - `mock_interviews`
-
----
-
-## 🚀 Building & Running
-
-### Android Build
-To build the application in this environment or locally via Gradle:
+### Local Development
 ```bash
-gradle :app:assembleDebug
+npm install
+npm run dev
 ```
 
----
+### Production Build
+```bash
+npm run build
+```
+Build output is generated into `dist/`.
 
-## 🌐 Vercel Web Deployment Guide
+### Vercel Deployment Settings
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Root Directory**: `.` (leave as root)
 
-To deploy the web portfolio version of AI CareerPilot to Vercel:
-
-1. **Export Code to GitHub**:
-   - Push the codebase to a GitHub repository:
-     ```bash
-     git init
-     git add .
-     git commit -m "Initial commit of AI CareerPilot"
-     git branch -M main
-     git remote add origin https://github.com/YOUR_USERNAME/ai-careerpilot.git
-     git push -u origin main
-     ```
-2. **Import to Vercel**:
-   - Log into [Vercel](https://vercel.com) and click **Add New > Project**.
-   - Select your GitHub repository.
-3. **Environment Variables**:
-   - In Vercel Project Settings > **Environment Variables**, add:
-     - `VITE_SUPABASE_URL`: Your Supabase Project URL
-     - `VITE_SUPABASE_ANON_KEY`: Your Supabase public Anon key
-     - `GEMINI_API_KEY`: Your Gemini API key
-4. **Deploy**:
-   - Click **Deploy**. Vercel will build the frontend and deploy serverless functions.
-5. **Configure Supabase Auth Redirects**:
-   - In Supabase Dashboard > Authentication > URL Configuration, add your Vercel deployment URL (e.g. `https://ai-careerpilot.vercel.app`) to **Redirect URLs**.
-
----
-
-## 💡 Troubleshooting & Common Issues
-
-- **Missing Gemini Key**: If `GEMINI_API_KEY` is not present, the app displays a clear setup message and switches automatically to local ATS parsing and rubric matching without crashing.
-- **Database Persistence**: On Android, all changes (profile updates, bookmarks, roadmap module progress) persist automatically on device through SQLite/Room.
+### Environment Variables on Vercel:
+Add the following in Vercel **Project Settings > Environment Variables**:
+- `GEMINI_API_KEY`: Your Google Gemini API key
+- `VITE_GEMINI_API_KEY`: (Optional) Your Gemini API key for client-side direct calls
+- `VITE_SUPABASE_URL`: Your Supabase Project URL (`https://your-project.supabase.co`)
+- `VITE_SUPABASE_ANON_KEY`: Your Supabase public anonymous API key
