@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Career Rocket / Compass Pilot Icon centered in 66dp safe zone (21..87) -->
+    <!-- Rocket fuselage -->
+    <path
+        android:pathData="M54,26 C47,38 45,52 45,63 L63,63 C63,52 61,38 54,26 Z"
+        android:fillColor="#38BDF8" />
+    <!-- Center core stripe / window -->
+    <path
+        android:pathData="M54,40 A5,5 0 1,0 54,50 A5,5 0 1,0 54,40 Z"
+        android:fillColor="#0F172A" />
+    <path
+        android:pathData="M54,42 A3,3 0 1,0 54,48 A3,3 0 1,0 54,42 Z"
+        android:fillColor="#E0F2FE" />
+    <!-- Left wing fin -->
+    <path
+        android:pathData="M45,54 L36,66 C35,69 38,71 42,69 L45,67 Z"
+        android:fillColor="#818CF8" />
+    <!-- Right wing fin -->
+    <path
+        android:pathData="M63,54 L72,66 C73,69 70,71 66,69 L63,67 Z"
+        android:fillColor="#818CF8" />
+    <!-- Rocket exhaust flame / trail -->
+    <path
+        android:pathData="M48,65 L54,78 L60,65 L54,67 Z"
+        android:fillColor="#F59E0B" />
+    <path
+        android:pathData="M50,65 L54,73 L58,65 Z"
+        android:fillColor="#FDE047" />
+    <!-- Guiding Stars / Constellation dots -->
+    <path
+        android:pathData="M34,34 L36,38 L40,40 L36,42 L34,46 L32,42 L28,40 L32,38 Z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M74,32 L75.5,35 L78.5,36.5 L75.5,38 L74,41 L72.5,38 L69.5,36.5 L72.5,35 Z"
+        android:fillColor="#38BDF8" />
+    <!-- Horizon orbit arc -->
+    <path
+        android:pathData="M28,74 C44,82 64,82 80,74"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+</vector>
